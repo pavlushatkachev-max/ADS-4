@@ -5,7 +5,7 @@ int countPairs1(int *arr, int len, int value) {
     for (int i = 0; i < len; i++) {
         for (int j = i + 1; j < len; j++) {
             if (arr[i] + arr[j] == value) {
-                  count++;
+                count++;
             }
         }
     }
@@ -18,9 +18,25 @@ int countPairs2(int *arr, int len, int value) {
     while (left < right) {
         int sum = arr[left] + arr[right];
         if (sum == value) {
-            count++;
-            left++;
-            right--;
+            if (arr[left] == arr[right]) {
+                int n = right - left + 1;
+                count += n * (n - 1) / 2;
+                break;
+            } else {
+                int leftCount = 1;
+                int rightCount = 1;
+                while (left + 1 < right && arr[left + 1] == arr[left]) {
+                    leftCount++;
+                    left++;
+                }
+                while (right - 1 > left && arr[right - 1] == arr[right]) {
+                    rightCount++;
+                    right--;
+                }
+                count += leftCount * rightCount;
+                left++;
+                right--;
+            }
         } else if (sum < value) {
             left++;
         } else {
@@ -44,22 +60,31 @@ int binarySearch(int *arr, int left, int right, int target) {
 }
 int countPairs3(int *arr, int len, int value) {
     int count = 0;
-    for (int i = 0; i < len; i++) {
-        int target = value - arr[i];
-        int found = binarySearch(arr, i + 1, len - 1, target);
-        if (found != -1) {
-            int j = found;
-            while (j > i && arr[j] == target) {
-                j--;
-            }
-            j++;
-            while (j < len && arr[j] == target) {
-                if (j > i) {
-                    count++;
-                }
-                j++;
-            }
+    int i = 0;
+    while (i < len) {
+        int currentVal = arr[i];
+        int currentCount = 1;
+        while (i + 1 < len && arr[i + 1] == currentVal) {
+            currentCount++;
+            i++;
         }
+        int target = value - currentVal;
+        if (target > currentVal) {
+            int pos = binarySearch(arr, i + 1, len - 1, target);
+            if (pos != -1) {
+                int targetCount = 1;
+                int j = pos;
+                while (j + 1 < len && arr[j + 1] == target) {
+                    targetCount++;
+                    j++;
+                }
+                count += currentCount * targetCount;
+            }
+        } else if (target == currentVal) {
+            count += currentCount * (currentCount - 1) / 2;
+            break;
+        }
+        i++;
     }
     return count;
 }
